@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Report Problem - UrbanPulse</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow-lg">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <span class="text-3xl">🏙️</span>
+        <h1 class="text-2xl font-bold text-blue-600">UrbanPulse</h1>
+      </div>
+      <div class="flex items-center space-x-6">
+        <a href="dashboard.html" class="text-gray-700 hover:text-blue-600 font-medium">Dashboard</a>
+        <a href="complaints.html" class="text-gray-700 hover:text-blue-600 font-medium">All Complaints</a>
+        <span id="userName" class="text-gray-700 font-medium">👤 User</span>
+        <button onclick="logout()" class="text-red-600 hover:text-red-700 font-medium">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Complaint Form -->
+  <div class="container mx-auto px-4 py-12">
+    <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+      
+      <h2 class="text-3xl font-bold text-gray-800 mb-2">Report a Problem</h2>
+      <p class="text-gray-600 mb-8">Help us make your city better by reporting civic issues</p>
+
+      <form id="complaintForm" class="space-y-6" enctype="multipart/form-data" autocomplete="off">
+        <div>
+          <label class="block text-gray-700 font-medium mb-2">Problem Category *</label>
+          <select id="category" name="category" required
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+            <option value="">Select problem type</option>
+            <option value="drainage">🚰 Drainage Issues</option>
+            <option value="electricity">⚡ Electricity Problems</option>
+            <option value="roads">🛣️ Road/Pothole Issues</option>
+            <option value="sanitation">🗑️ Sanitation/Garbage</option>
+            <option value="water">💧 Water Supply</option>
+            <option value="streetlights">💡 Street Lights</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-medium mb-2">Location *</label>
+          <input type="text" id="location" name="location" required
+            placeholder="e.g., MG Road, Near City Mall, Vijayawada"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+          <p class="text-xs text-gray-500 mt-1">Be as specific as possible with landmarks</p>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-medium mb-2">Problem Description *</label>
+          <textarea id="description" name="description" required rows="4"
+            placeholder="Describe the problem in detail..."
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-medium mb-2">Upload Photos/Videos</label>
+          <input type="file" id="media" name="images" accept="image/*,video/*" multiple
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+          <p class="text-xs text-gray-500 mt-1">You can upload multiple images or videos</p>
+        </div>
+
+        <div id="mediaPreview" class="grid grid-cols-3 gap-4 hidden">
+          <!-- Preview images will appear here -->
+        </div>
+
+        <button type="submit"
+          class="w-full bg-blue-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition duration-200">
+          Submit Complaint
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/submit.js"></script>
+</body>
+</html>
