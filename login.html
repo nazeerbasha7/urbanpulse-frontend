@@ -4,65 +4,370 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - UrbanPulse</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #000; color: #fff; min-height: 100vh; overflow-x: hidden; }
+    h1, h2, h3 { font-family: 'Playfair Display', serif; font-weight: 900; }
+    
+    .accent-text {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      color: #FF6B35;
+    }
+    
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,0.95);
+      backdrop-filter: blur(10px);
+      padding: 1.5rem 3rem;
+      border-bottom: 1px solid #222;
+    }
+    
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #FF6B35;
+      text-decoration: none;
+      letter-spacing: 2px;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+    
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: color 0.3s;
+    }
+    
+    .nav-links a:hover { color: #FF6B35; }
+    
+    /* Mobile Menu */
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: #FF6B35;
+      font-size: 1.75rem;
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+    
+    .mobile-menu {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 80%;
+      max-width: 400px;
+      height: 100vh;
+      background: rgba(0,0,0,0.98);
+      backdrop-filter: blur(20px);
+      padding: 5rem 2rem 2rem;
+      transition: right 0.4s ease;
+      z-index: 999;
+      border-left: 1px solid #222;
+    }
+    
+    .mobile-menu.active { right: 0; }
+    
+    .mobile-menu a {
+      display: block;
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.25rem;
+      font-weight: 500;
+      padding: 1rem 0;
+      border-bottom: 1px solid #222;
+      transition: all 0.3s;
+    }
+    
+    .mobile-menu a:hover { color: #FF6B35; padding-left: 1rem; }
+    
+    .mobile-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: rgba(0,0,0,0.8);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+      z-index: 998;
+    }
+    
+    .mobile-overlay.active { opacity: 1; visibility: visible; }
+    
+    /* Login Container */
+    .login-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8rem 2rem 4rem;
+      background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)), 
+                  url('https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1920') center/cover fixed;
+    }
+    
+    .login-container {
+      max-width: 500px;
+      width: 100%;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid #222;
+      padding: 4rem;
+      border-radius: 4px;
+    }
+    
+    .form-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .form-header .accent-text { display: block; margin-bottom: 1rem; }
+    
+    .form-header h1 {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .form-header p {
+      color: rgba(255,255,255,0.6);
+      font-size: 0.95rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      color: rgba(255,255,255,0.8);
+    }
+    
+    input {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid #333;
+      color: #fff;
+      padding: 1rem 1.25rem;
+      font-size: 0.95rem;
+      font-family: 'Inter', sans-serif;
+      border-radius: 2px;
+      transition: all 0.3s;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: #FF6B35;
+      background: rgba(255,255,255,0.08);
+    }
+    
+    input::placeholder { color: rgba(255,255,255,0.3); }
+    
+    .submit-btn {
+      width: 100%;
+      background: #FF6B35;
+      color: #000;
+      border: none;
+      padding: 1.25rem;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.3s;
+      margin-top: 1rem;
+      font-family: 'Montserrat', sans-serif;
+    }
+    
+    .submit-btn:hover {
+      background: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255,107,53,0.3);
+    }
+    
+    .submit-btn:disabled {
+      background: #444;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .spinner {
+      border: 3px solid rgba(0,0,0,0.3);
+      border-top: 3px solid #000;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .form-footer {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid #222;
+    }
+    
+    .form-footer p {
+      color: rgba(255,255,255,0.6);
+      font-size: 0.9rem;
+    }
+    
+    .form-footer a {
+      color: #FF6B35;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    
+    .form-footer a:hover { text-decoration: underline; }
+    
+    .toast {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      background: rgba(255,255,255,0.95);
+      color: #000;
+      padding: 1.25rem 2rem;
+      border-radius: 4px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      z-index: 2000;
+      animation: slideIn 0.3s ease-out;
+      border-left: 4px solid #10b981;
+    }
+    
+    .toast.error { border-left-color: #ef4444; }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(100px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .mobile-menu-btn { display: block; }
+      .login-container { padding: 2rem 1.5rem; }
+      .form-header h1 { font-size: 2rem; }
+      .toast { right: 1rem; left: 1rem; }
+    }
+  </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-blue-100 min-h-screen">
+<body>
 
-  <!-- Navbar -->
-  <nav class="bg-white shadow-lg">
-    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-      <div class="flex items-center space-x-2">
-        <span class="text-3xl">🏙️</span>
-        <h1 class="text-2xl font-bold text-blue-600">UrbanPulse</h1>
+  <div id="toastContainer"></div>
+
+  <div class="mobile-overlay" id="mobileOverlay" onclick="toggleMobileMenu()"></div>
+
+  <nav>
+    <div class="nav-container">
+      <a href="index.html" class="logo">URBANPULSE</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="register.html">Register</a>
       </div>
-      <div class="space-x-4">
-        <a href="index.html" class="text-gray-700 hover:text-blue-600 font-medium">Home</a>
-        <a href="register.html" class="text-blue-600 hover:text-blue-700 font-medium">Register</a>
-      </div>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()">☰</button>
     </div>
   </nav>
 
-  <!-- Login Form -->
-  <div class="container mx-auto px-4 py-20">
-    <div class="max-w-md mx-auto bg-white rounded-2xl shadow-2xl p-8">
-      
-      <h2 class="text-3xl font-bold text-center text-gray-800 mb-2">Welcome Back</h2>
-      <p class="text-center text-gray-600 mb-8">Login to report civic issues</p>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html" onclick="toggleMobileMenu()">Home</a>
+    <a href="register.html" onclick="toggleMobileMenu()">Register</a>
+  </div>
 
-      <form id="loginForm" class="space-y-6">
-        
-        <!-- Email -->
-        <div>
-          <label class="block text-gray-700 font-medium mb-2">Email Address</label>
-          <input type="email" id="loginEmail" required
-                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                 placeholder="your.email@example.com">
+  <div class="login-wrapper">
+    <div class="login-container" data-aos="fade-up" data-aos-duration="1000">
+      <div class="form-header">
+        <span class="accent-text">Welcome Back</span>
+        <h1>Login</h1>
+        <p>Access your account</p>
+      </div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="loginEmail" required placeholder="your.email@example.com">
         </div>
 
-        <!-- Password -->
-        <div>
-          <label class="block text-gray-700 font-medium mb-2">Password</label>
-          <input type="password" id="loginPassword" required
-                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                 placeholder="Enter your password">
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="loginPassword" required placeholder="Enter your password">
         </div>
 
-        <!-- Submit Button -->
-        <button type="submit" 
-                class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-200">
+        <button type="submit" class="submit-btn" id="loginBtn">
           Login
         </button>
-
       </form>
 
-      <p class="text-center text-gray-600 mt-6">
-        Don't have an account? 
-        <a href="register.html" class="text-blue-600 font-semibold hover:underline">Register here</a>
-      </p>
-
+      <div class="form-footer">
+        <p>Don't have an account? <a href="register.html">Register here</a></p>
+      </div>
     </div>
   </div>
 
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <script src="js/auth.js"></script>
+  <script>
+    AOS.init({ duration: 1000, once: true });
+    
+    function toggleMobileMenu() {
+      const mobileMenu = document.getElementById('mobileMenu');
+      const mobileOverlay = document.getElementById('mobileOverlay');
+      const menuBtn = document.getElementById('mobileMenuBtn');
+      
+      mobileMenu.classList.toggle('active');
+      mobileOverlay.classList.toggle('active');
+      
+      if (mobileMenu.classList.contains('active')) {
+        menuBtn.textContent = '✕';
+        document.body.style.overflow = 'hidden';
+      } else {
+        menuBtn.textContent = '☰';
+        document.body.style.overflow = '';
+      }
+    }
+  </script>
+
 </body>
 </html>

@@ -3,85 +3,555 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UrbanPulse - Interactive City Solutions</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="css/style.css">
-
+  <title>UrbanPulse - Transform Your City</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #000; color: #fff; overflow-x: hidden; }
+    html { scroll-behavior: smooth; }
+    h1, h2, h3 { font-family: 'Playfair Display', serif; font-weight: 900; }
+    
+    .accent-text {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      color: #FF6B35;
+    }
+    
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(10px);
+      padding: 1.5rem 3rem;
+      transition: all 0.3s ease;
+    }
+    
+    nav.scrolled { background: rgba(0,0,0,0.95); padding: 1rem 3rem; }
+    
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #FF6B35;
+      text-decoration: none;
+      letter-spacing: 2px;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 3rem;
+      align-items: center;
+    }
+    
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: color 0.3s;
+      letter-spacing: 1px;
+    }
+    
+    .nav-links a:hover { color: #FF6B35; }
+    
+    .nav-cta {
+      background: #FF6B35;
+      color: #000 !important;
+      padding: 0.75rem 2rem;
+      border-radius: 2px;
+      font-weight: 700;
+      transition: all 0.3s;
+    }
+    
+    .nav-cta:hover { background: #fff; transform: translateY(-2px); }
+    
+    /* Mobile Menu */
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: #FF6B35;
+      font-size: 1.75rem;
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+    
+    .mobile-menu {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 80%;
+      max-width: 400px;
+      height: 100vh;
+      background: rgba(0,0,0,0.98);
+      backdrop-filter: blur(20px);
+      padding: 5rem 2rem 2rem;
+      transition: right 0.4s ease;
+      z-index: 999;
+      border-left: 1px solid #222;
+    }
+    
+    .mobile-menu.active { right: 0; }
+    
+    .mobile-menu a {
+      display: block;
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.25rem;
+      font-weight: 500;
+      padding: 1rem 0;
+      border-bottom: 1px solid #222;
+      transition: all 0.3s;
+    }
+    
+    .mobile-menu a:hover { color: #FF6B35; padding-left: 1rem; }
+    
+    .mobile-menu .nav-cta {
+      display: inline-block;
+      margin-top: 2rem;
+      padding: 1rem 2rem;
+      text-align: center;
+      border-bottom: none;
+    }
+    
+    .mobile-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: rgba(0,0,0,0.8);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+      z-index: 998;
+    }
+    
+    .mobile-overlay.active { opacity: 1; visibility: visible; }
+    
+    /* Hero */
+    .hero {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), 
+                  url('https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1920') center/cover;
+      z-index: -1;
+    }
+    
+    .hero-content {
+      text-align: center;
+      max-width: 900px;
+      padding: 0 2rem;
+    }
+    
+    .hero-content .accent-text { margin-bottom: 1.5rem; display: block; }
+    
+    .hero h1 {
+      font-size: clamp(3rem, 8vw, 6rem);
+      line-height: 1.1;
+      margin-bottom: 2rem;
+      font-weight: 900;
+    }
+    
+    .hero p {
+      font-size: 1.25rem;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 3rem;
+      line-height: 1.8;
+      font-weight: 300;
+    }
+    
+    .hero-cta {
+      display: inline-block;
+      background: #FF6B35;
+      color: #000;
+      padding: 1.25rem 3rem;
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+      border-radius: 2px;
+      transition: all 0.3s;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    
+    .hero-cta:hover {
+      background: #fff;
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(255,107,53,0.3);
+    }
+    
+    .scroll-indicator {
+      position: absolute;
+      bottom: 3rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 2px;
+      animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(10px); }
+    }
+    
+    /* Sections */
+    section {
+      padding: 8rem 3rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .section-header {
+      text-align: center;
+      margin-bottom: 5rem;
+    }
+    
+    .section-header .accent-text { display: block; margin-bottom: 1rem; }
+    
+    .section-header h2 {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      margin-bottom: 1.5rem;
+    }
+    
+    .section-header p {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.7);
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+    
+    .dark-section { background: #0a0a0a; }
+    .darker-section { background: #000; }
+    
+    /* Problems Grid */
+    .problems-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+    
+    .problem-card {
+      position: relative;
+      height: 400px;
+      overflow: hidden;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    
+    .problem-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+    
+    .problem-card:hover img { transform: scale(1.1); }
+    
+    .problem-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+      padding: 2rem;
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.4s ease;
+    }
+    
+    .problem-card:hover .problem-overlay {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .problem-overlay h3 {
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .problem-overlay p {
+      color: rgba(255,255,255,0.8);
+      font-size: 0.95rem;
+    }
+    
+    /* Steps - 3 STEPS */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 4rem;
+      margin-top: 4rem;
+    }
+    
+    .step {
+      text-align: center;
+    }
+    
+    .step-number {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #FF6B35, #FF8C00);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 900;
+      margin: 0 auto 2rem;
+      font-family: 'Montserrat', sans-serif;
+    }
+    
+    .step h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .step p {
+      color: rgba(255,255,255,0.7);
+      line-height: 1.8;
+    }
+    
+    /* CTA */
+    .cta-section {
+      text-align: center;
+      padding: 10rem 3rem;
+      background: linear-gradient(135deg, #FF6B35, #FF8C00);
+      color: #000;
+    }
+    
+    .cta-section h2 {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      margin-bottom: 2rem;
+    }
+    
+    .cta-section p {
+      font-size: 1.25rem;
+      margin-bottom: 3rem;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .cta-button {
+      display: inline-block;
+      background: #000;
+      color: #fff;
+      padding: 1.25rem 3rem;
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+      border-radius: 2px;
+      transition: all 0.3s;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    
+    .cta-button:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    
+    /* Footer */
+    footer {
+      background: #000;
+      padding: 3rem;
+      text-align: center;
+      border-top: 1px solid #222;
+    }
+    
+    footer .logo {
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+    
+    footer p {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.9rem;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .mobile-menu-btn { display: block; }
+      section { padding: 4rem 1.5rem; }
+      .problems-grid { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr; gap: 2rem; }
+      .cta-section { padding: 6rem 1.5rem; }
+    }
+  </style>
 </head>
-<body class="bg-gray-50">
+<body>
 
-  <!-- Navbar -->
-  <nav class="bg-white shadow-lg">
-    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-      <div class="flex items-center space-x-2">
-        <span class="text-3xl">🏙️</span>
-        <h1 class="text-2xl font-bold text-blue-600">UrbanPulse</h1>
+  <div class="mobile-overlay" id="mobileOverlay" onclick="toggleMobileMenu()"></div>
+
+  <nav id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">URBANPULSE</a>
+      <div class="nav-links">
+        <a href="#concept">Concept</a>
+        <a href="#problems">Problems</a>
+        <a href="#how">How It Works</a>
+        <a href="complaints.html">View Complaints</a>
+        <a href="register.html" class="nav-cta">Get Started</a>
       </div>
-      <div class="space-x-4">
-        <a href="index.html" class="text-gray-700 hover:text-blue-600 font-medium">Home</a>
-        <a href="complaints.html" class="text-gray-700 hover:text-blue-600 font-medium">All Complaints</a>
-        <a href="login.html" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Login</a>
-      </div>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()">☰</button>
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <section class="container mx-auto px-4 py-20 text-center">
-    <h2 class="text-5xl font-bold text-gray-800 mb-6">
-      Empower Your City, One Report at a Time
-    </h2>
-    <p class="text-xl text-gray-600 mb-10 max-w-3xl mx-auto">
-      Report civic issues like potholes, drainage problems, power outages, and more. 
-      Track solutions in real-time and make your city better together.
-    </p>
-    <div class="space-x-4">
-      <a href="register.html" class="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 inline-block">
-        Get Started - Register Free
-      </a>
-      <a href="dashboard.html" class="bg-gray-200 text-gray-700 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-300 inline-block">
-        View Public Complaints
-      </a>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#concept" onclick="toggleMobileMenu()">Concept</a>
+    <a href="#problems" onclick="toggleMobileMenu()">Problems</a>
+    <a href="#how" onclick="toggleMobileMenu()">How It Works</a>
+    <a href="complaints.html">View Complaints</a>
+    <a href="register.html" class="nav-cta">Get Started</a>
+  </div>
+
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content" data-aos="fade-up" data-aos-duration="1200">
+      <span class="accent-text">Transform Your City</span>
+      <h1>Report.<br>Alert.<br>Track.</h1>
+      <p>Empower your community to report civic issues, alert authorities instantly, and track resolution progress in real-time.</p>
+      <a href="register.html" class="hero-cta">Start Reporting</a>
+    </div>
+    <div class="scroll-indicator">SCROLL ↓</div>
+  </section>
+
+  <section id="concept" class="dark-section">
+    <div class="section-header" data-aos="fade-up">
+      <span class="accent-text">The Vision</span>
+      <h2>Born from<br>Urban Needs</h2>
+      <p>Every city faces challenges. From potholes to power outages, drainage issues to streetlight failures. UrbanPulse connects citizens with authorities to solve these problems faster.</p>
     </div>
   </section>
 
-  <!-- Features Section -->
-  <section class="bg-white py-16">
-    <div class="container mx-auto px-4">
-      <h3 class="text-3xl font-bold text-center mb-12 text-gray-800">How UrbanPulse Works</h3>
-      
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        
-        <!-- Feature 1 -->
-        <div class="text-center p-6 bg-blue-50 rounded-xl">
-          <div class="text-5xl mb-4">📸</div>
-          <h4 class="text-xl font-bold mb-3 text-gray-800">Report Issues</h4>
-          <p class="text-gray-600">Upload photos/videos of civic problems with location details</p>
+  <section id="problems" class="darker-section">
+    <div class="section-header" data-aos="fade-up">
+      <span class="accent-text">Urban Challenges</span>
+      <h2>Real Problems.<br>Real Solutions.</h2>
+    </div>
+    <div class="problems-grid">
+      <div class="problem-card" data-aos="fade-up" data-aos-delay="100">
+        <img src="https://images.unsplash.com/photo-1625244724120-1fd1d34d00f6?w=800" alt="Pothole">
+        <div class="problem-overlay">
+          <h3>Road Damage</h3>
+          <p>Dangerous potholes and damaged roads causing accidents</p>
         </div>
-
-        <!-- Feature 2 -->
-        <div class="text-center p-6 bg-green-50 rounded-xl">
-          <div class="text-5xl mb-4">📱</div>
-          <h4 class="text-xl font-bold mb-3 text-gray-800">Instant Notification</h4>
-          <p class="text-gray-600">Complaints automatically sent to responsible authorities via WhatsApp</p>
+      </div>
+      <div class="problem-card" data-aos="fade-up" data-aos-delay="200">
+        <img src="https://images.unsplash.com/photo-1583912267550-477a71308e8b?w=800" alt="Drainage">
+        <div class="problem-overlay">
+          <h3>Drainage Issues</h3>
+          <p>Overflowing drains and waterlogging during monsoons</p>
         </div>
-
-        <!-- Feature 3 -->
-        <div class="text-center p-6 bg-purple-50 rounded-xl">
-          <div class="text-5xl mb-4">🔄</div>
-          <h4 class="text-xl font-bold mb-3 text-gray-800">Track Progress</h4>
-          <p class="text-gray-600">Real-time status updates from submission to resolution</p>
+      </div>
+      <div class="problem-card" data-aos="fade-up" data-aos-delay="300">
+        <img src="https://images.unsplash.com/photo-1473186578172-c141e6798cf4?w=800" alt="Garbage">
+        <div class="problem-overlay">
+          <h3>Waste Management</h3>
+          <p>Irregular garbage collection and overflowing bins</p>
         </div>
-
       </div>
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer class="bg-gray-800 text-white py-8 mt-20">
-    <div class="container mx-auto px-4 text-center">
-      <p>&copy; 2025 UrbanPulse. Building Better Cities Together.</p>
+  <section id="how" class="dark-section">
+    <div class="section-header" data-aos="fade-up">
+      <span class="accent-text">Process</span>
+      <h2>Simple.<br>Fast.<br>Effective.</h2>
     </div>
+    <div class="steps">
+      <div class="step" data-aos="fade-up" data-aos-delay="100">
+        <div class="step-number">1</div>
+        <h3>Report</h3>
+        <p>Capture the issue with your phone. Add location, description, and photos in seconds.</p>
+      </div>
+      <div class="step" data-aos="fade-up" data-aos-delay="200">
+        <div class="step-number">2</div>
+        <h3>Alert</h3>
+        <p>Authorities receive instant WhatsApp notifications with all complaint details for immediate action.</p>
+      </div>
+      <div class="step" data-aos="fade-up" data-aos-delay="300">
+        <div class="step-number">3</div>
+        <h3>Track</h3>
+        <p>Get a tracking link via WhatsApp to monitor your complaint status from submission to resolution.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section" data-aos="fade-up">
+    <h2>Ready to Make<br>a Difference?</h2>
+    <p>Join thousands of citizens building smarter, safer cities.</p>
+    <a href="register.html" class="cta-button">Register Free Today</a>
+  </section>
+
+  <footer>
+    <a href="index.html" class="logo">URBANPULSE</a>
+    <p>&copy; 2025 UrbanPulse. Building Better Cities Together.</p>
   </footer>
+
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init({ duration: 1000, once: true, offset: 100 });
+    
+    window.addEventListener('scroll', () => {
+      const navbar = document.getElementById('navbar');
+      if (window.scrollY > 100) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
+    
+    function toggleMobileMenu() {
+      const mobileMenu = document.getElementById('mobileMenu');
+      const mobileOverlay = document.getElementById('mobileOverlay');
+      const menuBtn = document.getElementById('mobileMenuBtn');
+      
+      mobileMenu.classList.toggle('active');
+      mobileOverlay.classList.toggle('active');
+      
+      if (mobileMenu.classList.contains('active')) {
+        menuBtn.textContent = '✕';
+        document.body.style.overflow = 'hidden';
+      } else {
+        menuBtn.textContent = '☰';
+        document.body.style.overflow = '';
+      }
+    }
+  </script>
 
 </body>
 </html>

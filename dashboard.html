@@ -3,74 +3,470 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Complaints Dashboard - UrbanPulse</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>My Dashboard - UrbanPulse</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; }
+    h1, h2, h3 { font-family: 'Playfair Display', serif; font-weight: 900; }
+    
+    .accent-text {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      color: #FF6B35;
+    }
+    
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: #000;
+      border-bottom: 1px solid #222;
+      padding: 1rem 3rem;
+    }
+    
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #FF6B35;
+      text-decoration: none;
+      letter-spacing: 2px;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+    
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: color 0.3s;
+    }
+    
+    .nav-links a:hover, .nav-links a.active { color: #FF6B35; }
+    
+    .nav-cta {
+      background: #FF6B35;
+      color: #000 !important;
+      padding: 0.75rem 1.5rem;
+      border-radius: 2px;
+      font-weight: 700;
+      transition: all 0.3s;
+    }
+    
+    .nav-cta:hover { background: #fff; transform: translateY(-2px); }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    #userName {
+      color: rgba(255,255,255,0.8);
+      font-size: 0.9rem;
+    }
+    
+    .logout-btn {
+      background: none;
+      border: 1px solid #333;
+      color: #fff;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      border-radius: 2px;
+      font-size: 0.85rem;
+      transition: all 0.3s;
+    }
+    
+    .logout-btn:hover {
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+    
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: #FF6B35;
+      font-size: 1.75rem;
+      cursor: pointer;
+    }
+    
+    .mobile-menu {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 80%;
+      max-width: 400px;
+      height: 100vh;
+      background: rgba(0,0,0,0.98);
+      backdrop-filter: blur(20px);
+      padding: 5rem 2rem 2rem;
+      transition: right 0.4s ease;
+      z-index: 999;
+      border-left: 1px solid #222;
+    }
+    
+    .mobile-menu.active { right: 0; }
+    
+    .mobile-menu a {
+      display: block;
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.25rem;
+      font-weight: 500;
+      padding: 1rem 0;
+      border-bottom: 1px solid #222;
+      transition: all 0.3s;
+    }
+    
+    .mobile-menu a:hover { color: #FF6B35; padding-left: 1rem; }
+    
+    .mobile-menu .nav-cta {
+      display: inline-block;
+      margin-top: 2rem;
+      padding: 1rem 2rem;
+      text-align: center;
+      border-bottom: none;
+    }
+    
+    .mobile-menu .user-info {
+      flex-direction: column;
+      align-items: flex-start;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid #222;
+    }
+    
+    .mobile-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: rgba(0,0,0,0.8);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+      z-index: 998;
+    }
+    
+    .mobile-overlay.active { opacity: 1; visibility: visible; }
+    
+    .main-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 4rem 3rem;
+    }
+    
+    .page-header {
+      margin-bottom: 3rem;
+    }
+    
+    .page-header .accent-text {
+      display: block;
+      margin-bottom: 1rem;
+    }
+    
+    .page-header h1 {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .filters {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid #222;
+      padding: 2rem;
+      border-radius: 4px;
+      margin-bottom: 3rem;
+    }
+    
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .filter-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      color: rgba(255,255,255,0.6);
+    }
+    
+    input, select {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid #333;
+      color: #fff;
+      padding: 0.875rem 1rem;
+      font-size: 0.9rem;
+      font-family: 'Inter', sans-serif;
+      border-radius: 2px;
+      transition: all 0.3s;
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: #FF6B35;
+      background: rgba(255,255,255,0.08);
+    }
+    
+    select option { background: #111; color: #fff; }
+    
+    .complaints-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+    
+    .complaint-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid #222;
+      border-radius: 4px;
+      overflow: hidden;
+      transition: all 0.4s ease;
+      cursor: pointer;
+    }
+    
+    .complaint-card:hover {
+      transform: translateY(-8px);
+      border-color: #FF6B35;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    
+    .complaint-image {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      background: #1a1a1a;
+    }
+    
+    .complaint-content { padding: 1.5rem; }
+    
+    .complaint-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .category-badge {
+      background: rgba(255,107,53,0.2);
+      color: #FF6B35;
+      padding: 0.35rem 0.75rem;
+      border-radius: 2px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    
+    .status-badge {
+      padding: 0.35rem 0.75rem;
+      border-radius: 2px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    
+    .status-submitted { background: rgba(251,191,36,0.2); color: #fbbf24; }
+    .status-in-progress { background: rgba(59,130,246,0.2); color: #3b82f6; }
+    .status-resolved { background: rgba(16,185,129,0.2); color: #10b981; }
+    
+    .complaint-location {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: #fff;
+    }
+    
+    .complaint-description {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    .complaint-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      border-top: 1px solid #222;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.5);
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 4rem;
+    }
+    
+    .spinner {
+      border: 4px solid #222;
+      border-top: 4px solid #FF6B35;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1.5rem;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 6rem 2rem;
+    }
+    
+    .empty-state h3 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: rgba(255,255,255,0.7);
+    }
+    
+    .empty-state p { color: rgba(255,255,255,0.5); }
+    
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .mobile-menu-btn { display: block; }
+      .main-content { padding: 2rem 1.5rem; }
+      .page-header h1 { font-size: 2.5rem; }
+      .complaints-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
-<body class="bg-gray-50">
+<body>
 
-  <!-- Navbar (Logged In) -->
-  <nav class="bg-white shadow-lg">
-    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-      <div class="flex items-center space-x-2">
-        <span class="text-3xl">🏙️</span>
-        <h1 class="text-2xl font-bold text-blue-600">UrbanPulse</h1>
+  <div class="mobile-overlay" id="mobileOverlay" onclick="toggleMobileMenu()"></div>
+
+  <nav>
+    <div class="nav-container">
+      <a href="index.html" class="logo">URBANPULSE</a>
+      <div class="nav-links">
+        <a href="dashboard.html" class="active">My Dashboard</a>
+        <a href="complaints.html">All Complaints</a>
+        <a href="submit-complaint.html" class="nav-cta">+ Report</a>
+        <div class="user-info">
+          <span id="userName">👤 User</span>
+          <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
       </div>
-      <div class="flex items-center space-x-6">
-        <a href="dashboard.html" class="text-gray-700 hover:text-blue-600 font-medium">Dashboard</a>
-        <a href="complaints.html" class="text-gray-700 hover:text-blue-600 font-medium">All Complaints</a>
-        <a href="submit-complaint.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-          + Report Problem
-        </a>
-        <span id="userName" class="text-gray-700 font-medium">👤 User</span>
-        <button onclick="logout()" class="text-red-600 hover:text-red-700 font-medium">Logout</button>
-      </div>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()">☰</button>
     </div>
   </nav>
 
-  <!-- Search and Filter Section -->
-  <div class="container mx-auto px-4 py-8">
-    
-    <h2 class="text-3xl font-bold text-gray-800 mb-6">All Complaints</h2>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="dashboard.html" onclick="toggleMobileMenu()">My Dashboard</a>
+    <a href="complaints.html" onclick="toggleMobileMenu()">All Complaints</a>
+    <a href="submit-complaint.html" class="nav-cta">+ Report</a>
+    <div class="user-info">
+      <span id="userNameMobile">👤 User</span>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
 
-    <div class="bg-white p-6 rounded-xl shadow-md mb-8 space-y-4">
-      
-      <!-- Location Search -->
-      <div>
-        <label class="block text-gray-700 font-medium mb-2">🔍 Search by Location</label>
-        <input type="text" id="locationSearch" 
-               placeholder="e.g., MG Road, Gandhi Nagar, Benz Circle..."
-               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-      </div>
-
-      <!-- Problem Filter -->
-      <div>
-        <label class="block text-gray-700 font-medium mb-2">🏷️ Filter by Problem Type</label>
-        <select id="problemFilter" 
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-          <option value="all">All Problems</option>
-          <option value="drainage">Drainage Issues</option>
-          <option value="electricity">Electricity Problems</option>
-          <option value="roads">Road/Pothole Issues</option>
-          <option value="sanitation">Sanitation/Garbage</option>
-          <option value="water">Water Supply</option>
-          <option value="streetlights">Street Lights</option>
-        </select>
-      </div>
-
+  <div class="main-content">
+    <div class="page-header">
+      <span class="accent-text">Your Dashboard</span>
+      <h1>My Complaints</h1>
     </div>
 
-    <!-- Complaints Grid -->
-    <div id="complaintsGrid" 
-         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      <!-- Cards will be loaded here by JavaScript -->
-      <div class="col-span-full text-center py-12 text-gray-500">
-        <div class="text-5xl mb-4">🔄</div>
-        <p>Loading complaints...</p>
+    <div class="filters">
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label>🔍 Search Location</label>
+          <input type="text" id="locationSearch" placeholder="Search by location...">
+        </div>
+        <div class="filter-group">
+          <label>🏷️ Category</label>
+          <select id="problemFilter">
+            <option value="all">All Categories</option>
+            <option value="drainage">Drainage</option>
+            <option value="electricity">Electricity</option>
+            <option value="roads">Roads</option>
+            <option value="sanitation">Sanitation</option>
+            <option value="water">Water</option>
+            <option value="streetlights">Street Lights</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div id="complaintsGrid" class="complaints-grid">
+      <div class="loading" style="grid-column: 1 / -1;">
+        <div class="spinner"></div>
+        <p style="color: rgba(255,255,255,0.6);">Loading your complaints...</p>
       </div>
     </div>
 
   </div>
 
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <script src="js/complaints.js"></script>
+  <script>
+    AOS.init({ duration: 800, once: true });
+    
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.clear();
+        window.location.href = 'index.html';
+      }
+    }
+    
+    function toggleMobileMenu() {
+      const mobileMenu = document.getElementById('mobileMenu');
+      const mobileOverlay = document.getElementById('mobileOverlay');
+      const menuBtn = document.getElementById('mobileMenuBtn');
+      
+      mobileMenu.classList.toggle('active');
+      mobileOverlay.classList.toggle('active');
+      
+      if (mobileMenu.classList.contains('active')) {
+        menuBtn.textContent = '✕';
+        document.body.style.overflow = 'hidden';
+      } else {
+        menuBtn.textContent = '☰';
+        document.body.style.overflow = '';
+      }
+    }
+    
+    // Update mobile user name
+    const userName = localStorage.getItem('userName');
+    if (userName) {
+      document.getElementById('userNameMobile').textContent = `👤 ${userName}`;
+    }
+  </script>
+
 </body>
 </html>

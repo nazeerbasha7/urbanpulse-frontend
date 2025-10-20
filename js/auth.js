@@ -1,28 +1,48 @@
 const API_URL = 'https://urbanpulse-backend.onrender.com';
 
-
-// Update navbar with user name on load
-window.addEventListener('DOMContentLoaded', () => {
-  const token = localStorage.getItem('token');
-  const userName = localStorage.getItem('userName');
+// Toast Notification System (ONLY show when called explicitly)
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toastContainer');
+  if (!container) return; // Don't show if container doesn't exist
   
-  if (token && userName) {
-    const userNameElement = document.getElementById('userName');
-    if (userNameElement) {
-      userNameElement.textContent = `👤 ${userName}`;
-    }
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  
+  const icon = type === 'success' ? '✅' : '❌';
+  toast.innerHTML = `
+    <span class="toast-icon">${icon}</span>
+    <span class="toast-message">${message}</span>
+  `;
+  
+  container.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100px)';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+// Update navbar with user name (silent - no toast)
+window.addEventListener('DOMContentLoaded', () => {
+  const userName = localStorage.getItem('userName');
+  const userNameElement = document.getElementById('userName');
+  
+  if (userName && userNameElement) {
+    userNameElement.textContent = `👤 ${userName}`;
   }
 });
 
-// Registration
+// Registration with AUTO-LOGIN
 const registerForm = document.getElementById('registerForm');
 if (registerForm) {
   registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const submitButton = e.target.querySelector('button[type="submit"]');
+    const submitButton = document.getElementById('submitBtn');
+    const originalText = submitButton.textContent;
     submitButton.disabled = true;
-    submitButton.textContent = 'Registering...';
+    submitButton.innerHTML = 'Registering...<span class="spinner"></span>';
     
     const userData = {
       fullName: document.getElementById('fullName').value.trim(),
@@ -33,8 +53,6 @@ if (registerForm) {
       address: document.getElementById('address').value.trim()
     };
     
-    console.log('📝 Registering user:', userData.fullName, userData.email);
-    
     try {
       const response = await fetch(`${API_URL}/register`, {
         method: 'POST',
@@ -43,41 +61,54 @@ if (registerForm) {
       });
       
       const data = await response.json();
-      console.log('📥 Server response:', data);
       
       if (response.ok) {
-        alert('✅ ' + data.message);
-        window.location.href = 'login.html';
+        // Auto-login: Save token and user info
+        if (data.token) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('userName', data.userName);
+          localStorage.setItem('userId', data.userId);
+          
+          showToast('🎉 Registration successful! Redirecting...', 'success');
+          
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 1500);
+        } else {
+          showToast('✅ Registration successful! Please login.', 'success');
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 1500);
+        }
       } else {
-        alert('❌ ' + data.message);
+        showToast(data.message || 'Registration failed', 'error');
         submitButton.disabled = false;
-        submitButton.textContent = 'Register Account';
+        submitButton.textContent = originalText;
       }
     } catch (error) {
-      console.error('❌ Registration error:', error);
-      alert('❌ Registration failed: ' + error.message);
+      console.error('Registration error:', error);
+      showToast('Network error. Please try again.', 'error');
       submitButton.disabled = false;
-      submitButton.textContent = 'Register Account';
+      submitButton.textContent = originalText;
     }
   });
 }
 
-// Login
+// Login (NO toast on page load, only on submit)
 const loginForm = document.getElementById('loginForm');
 if (loginForm) {
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const submitButton = e.target.querySelector('button[type="submit"]');
+    const submitButton = document.getElementById('loginBtn');
+    const originalText = submitButton.textContent;
     submitButton.disabled = true;
-    submitButton.textContent = 'Logging in...';
+    submitButton.innerHTML = 'Logging in...<span class="spinner"></span>';
     
     const loginData = {
       email: document.getElementById('loginEmail').value.trim().toLowerCase(),
       password: document.getElementById('loginPassword').value
     };
-    
-    console.log('🔐 Logging in:', loginData.email);
     
     try {
       const response = await fetch(`${API_URL}/login`, {
@@ -87,25 +118,26 @@ if (loginForm) {
       });
       
       const data = await response.json();
-      console.log('📥 Server response:', data);
       
       if (response.ok) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('userName', data.userName);
         localStorage.setItem('userId', data.userId);
         
-        alert('✅ ' + data.message);
-        window.location.href = 'dashboard.html';
+        showToast('🎉 Login successful!', 'success');
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 1000);
       } else {
-        alert('❌ ' + data.message);
+        showToast(data.message || 'Login failed', 'error');
         submitButton.disabled = false;
-        submitButton.textContent = 'Login';
+        submitButton.textContent = originalText;
       }
     } catch (error) {
-      console.error('❌ Login error:', error);
-      alert('❌ Login failed: ' + error.message);
+      console.error('Login error:', error);
+      showToast('Network error. Please try again.', 'error');
       submitButton.disabled = false;
-      submitButton.textContent = 'Login';
+      submitButton.textContent = originalText;
     }
   });
 }
@@ -118,13 +150,13 @@ function logout() {
   }
 }
 
-// Auth check
+// Auth check (silent - no toast)
 function checkAuth() {
   const token = localStorage.getItem('token');
   const currentPage = window.location.pathname;
   
   if (!token && (currentPage.includes('dashboard') || currentPage.includes('submit-complaint'))) {
-    alert('⚠️ Please login first');
+    // Redirect silently
     window.location.href = 'login.html';
   }
 }

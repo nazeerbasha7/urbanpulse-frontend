@@ -3,12 +3,34 @@ const token = localStorage.getItem('token');
 const userId = localStorage.getItem('userId');
 const userName = localStorage.getItem('userName');
 
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toastContainer') || document.body;
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  
+  const icon = type === 'success' ? '✅' : '❌';
+  toast.innerHTML = `
+    <span class="toast-icon">${icon}</span>
+    <span class="toast-message">${message}</span>
+  `;
+  
+  container.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100px)';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
 if (!token) {
-  alert('⚠️ Please login first');
   window.location.href = 'login.html';
 }
 
-document.getElementById('userName').textContent = `👤 ${userName}`;
+const userNameElement = document.getElementById('userName');
+if (userNameElement && userName) {
+  userNameElement.textContent = `👤 ${userName}`;
+}
 
 // Media preview
 document.getElementById('media').addEventListener('change', (e) => {
@@ -17,22 +39,17 @@ document.getElementById('media').addEventListener('change', (e) => {
   preview.innerHTML = '';
 
   if (files.length > 0) {
-    preview.classList.remove('hidden');
-
     Array.from(files).forEach(file => {
       if (file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onload = (event) => {
           const img = document.createElement('img');
           img.src = event.target.result;
-          img.className = 'w-full h-24 object-cover rounded-lg';
           preview.appendChild(img);
         };
         reader.readAsDataURL(file);
       }
     });
-  } else {
-    preview.classList.add('hidden');
   }
 });
 
@@ -40,18 +57,14 @@ document.getElementById('media').addEventListener('change', (e) => {
 document.getElementById('complaintForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const submitButton = e.target.querySelector('button[type="submit"]');
+  const submitButton = document.getElementById('submitBtn');
+  const originalText = submitButton.textContent;
   submitButton.disabled = true;
-  submitButton.textContent = 'Submitting...';
+  submitButton.innerHTML = 'Submitting...<span class="spinner"></span>';
 
   const formData = new FormData(e.target);
   formData.append('userId', userId);
   formData.append('userName', userName);
-
-  console.log('📤 Submitting complaint...');
-  console.log('User:', userName);
-  console.log('Category:', formData.get('category'));
-  console.log('Location:', formData.get('location'));
 
   try {
     const response = await fetch(`${API_URL}/submit-complaint`, {
@@ -60,21 +73,25 @@ document.getElementById('complaintForm').addEventListener('submit', async (e) =>
     });
 
     const data = await response.json();
-    console.log('📥 Server response:', data);
 
     if (response.ok) {
-      alert('✅ Complaint submitted successfully!');
-      window.location.href = 'dashboard.html';
+      showToast('✅ Complaint submitted successfully!', 'success');
+      e.target.reset();
+      document.getElementById('mediaPreview').innerHTML = '';
+      
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 2000);
     } else {
-      alert('❌ ' + data.message);
+      showToast(data.message || 'Submission failed', 'error');
       submitButton.disabled = false;
-      submitButton.textContent = 'Submit Complaint';
+      submitButton.textContent = originalText;
     }
   } catch (error) {
-    console.error('❌ Submission error:', error);
-    alert('❌ Submission failed: ' + error.message);
+    console.error('Submission error:', error);
+    showToast('Network error. Please try again.', 'error');
     submitButton.disabled = false;
-    submitButton.textContent = 'Submit Complaint';
+    submitButton.textContent = originalText;
   }
 });
 

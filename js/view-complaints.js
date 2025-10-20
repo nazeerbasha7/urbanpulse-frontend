@@ -1,312 +1,156 @@
-// API Configuration
 const API_URL = 'https://urbanpulse-backend.onrender.com';
-
-// Global variables
 let allComplaints = [];
-let filteredComplaints = [];
 
-// Initialize page
-window.addEventListener('DOMContentLoaded', () => {
-    // Check if user is logged in and update navbar
-    const userName = localStorage.getItem('userName');
-    if (userName) {
-        document.getElementById('userName').textContent = `👤 ${userName}`;
-    }
-    
-    // Load all complaints
-    fetchComplaints();
+window.addEventListener('DOMContentLoaded', async () => {
+  const userName = localStorage.getItem('userName');
+  const userNameElement = document.getElementById('userName');
+  
+  if (userName && userNameElement) {
+    userNameElement.textContent = `👤 ${userName}`;
+  }
+  
+  await loadComplaints();
+  setupFilters();
 });
 
-// Fetch complaints from API
-async function fetchComplaints() {
-    const loadingState = document.getElementById('loadingState');
-    const complaintsGrid = document.getElementById('complaintsGrid');
-    const noResults = document.getElementById('noResults');
-    
-    try {
-        loadingState.style.display = 'block';
-        complaintsGrid.style.display = 'none';
-        noResults.style.display = 'none';
-        
-        const response = await fetch(`${API_URL}/complaints`);
-        
-        if (!response.ok) {
-            throw new Error('Failed to fetch complaints');
-        }
-        
-        const data = await response.json();
-        allComplaints = data;
-        filteredComplaints = data;
-        
-        loadingState.style.display = 'none';
-        
-        if (data.length === 0) {
-            noResults.style.display = 'block';
-        } else {
-            complaintsGrid.style.display = 'grid';
-            displayComplaints(data);
-        }
-        
-        updateResultsCount(data.length);
-        
-    } catch (error) {
-        console.error('Error fetching complaints:', error);
-        loadingState.style.display = 'none';
-        noResults.style.display = 'block';
-        document.querySelector('.no-results h3').textContent = '❌ Error Loading Complaints';
-        document.querySelector('.no-results p').textContent = 'Please make sure the server is running on http://localhost:5000';
-    }
-}
-
-// Display complaints in grid
-function displayComplaints(complaints) {
-    const grid = document.getElementById('complaintsGrid');
-    
-    if (complaints.length === 0) {
-        grid.style.display = 'none';
-        document.getElementById('noResults').style.display = 'block';
-        return;
-    }
-    
-    grid.style.display = 'grid';
-    document.getElementById('noResults').style.display = 'none';
-    
-    grid.innerHTML = complaints.map(complaint => createComplaintCard(complaint)).join('');
-    
-    updateResultsCount(complaints.length);
-}
-
-// Create individual complaint card
-function createComplaintCard(complaint) {
-    const imageUrl = complaint.images && complaint.images.length > 0 
-        ? `${API_URL}${complaint.images[0]}` 
-        : 'https://via.placeholder.com/400x200/667eea/ffffff?text=No+Image';
-    
-    const statusClass = `status-${complaint.status.toLowerCase().replace(/\s+/g, '-')}`;
-    const date = new Date(complaint.submittedAt).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
-    
-    const imageCount = complaint.images ? complaint.images.length : 0;
-    
-    return `
-        <div class="complaint-card-wrapper">
-            <div class="complaint-card" onclick='openModal(${JSON.stringify(complaint).replace(/'/g, "&apos;")})'>
-                ${imageCount > 0 ? `<span class="image-count">📷 ${imageCount} photo${imageCount > 1 ? 's' : ''}</span>` : ''}
-                <img src="${imageUrl}" alt="${complaint.category}" class="complaint-image" onerror="this.src='https://via.placeholder.com/400x200/667eea/ffffff?text=No+Image'">
-                
-                <div class="complaint-content">
-                    <div class="complaint-header">
-                        <span class="category-badge">${complaint.category}</span>
-                        <span class="status-badge ${statusClass}">${complaint.status}</span>
-                    </div>
-                    
-                    <div class="complaint-location">
-                        <span>📍</span>
-                        <span>${complaint.location}</span>
-                    </div>
-                    
-                    <p class="complaint-description">${complaint.description}</p>
-                    
-                    <div class="complaint-footer">
-                        <div class="complaint-user">
-                            <span>👤</span>
-                            <span>${complaint.userName}</span>
-                        </div>
-                        <div class="complaint-date">${date}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-// Update results count
-function updateResultsCount(count) {
-    const resultsCount = document.getElementById('resultsCount');
-    resultsCount.textContent = `${count} Complaint${count !== 1 ? 's' : ''}`;
-}
-
-// Apply filters
-function applyFilters() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const category = document.getElementById('categoryFilter').value;
-    const location = document.getElementById('locationFilter').value.toLowerCase();
-    const status = document.getElementById('statusFilter').value;
-    const fromDate = document.getElementById('fromDate').value;
-    const toDate = document.getElementById('toDate').value;
-    
-    filteredComplaints = allComplaints.filter(complaint => {
-        // Search filter (checks location and description)
-        const matchesSearch = !searchTerm || 
-            complaint.location.toLowerCase().includes(searchTerm) ||
-            complaint.description.toLowerCase().includes(searchTerm) ||
-            complaint.category.toLowerCase().includes(searchTerm);
-        
-        // Category filter
-        const matchesCategory = !category || complaint.category === category;
-        
-        // Location filter
-        const matchesLocation = !location || complaint.location.toLowerCase().includes(location);
-        
-        // Status filter
-        const matchesStatus = !status || complaint.status === status;
-        
-        // Date filters
-        const complaintDate = new Date(complaint.submittedAt);
-        const matchesFromDate = !fromDate || complaintDate >= new Date(fromDate);
-        const matchesToDate = !toDate || complaintDate <= new Date(toDate + 'T23:59:59');
-        
-        return matchesSearch && matchesCategory && matchesLocation && 
-               matchesStatus && matchesFromDate && matchesToDate;
-    });
-    
-    displayComplaints(filteredComplaints);
-    
-    // Scroll to results
-    document.getElementById('complaintsGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-// Clear all filters
-function clearFilters() {
-    document.getElementById('searchInput').value = '';
-    document.getElementById('categoryFilter').value = '';
-    document.getElementById('locationFilter').value = '';
-    document.getElementById('statusFilter').value = '';
-    document.getElementById('fromDate').value = '';
-    document.getElementById('toDate').value = '';
-    
-    filteredComplaints = allComplaints;
+async function loadComplaints() {
+  try {
+    const response = await fetch(`${API_URL}/complaints`);
+    allComplaints = await response.json();
     displayComplaints(allComplaints);
-}
-
-// Add real-time search
-document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', debounce(applyFilters, 500));
-    }
-});
-
-// Debounce function for search
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// Open modal with complaint details
-function openModal(complaint) {
-    const modal = document.getElementById('complaintModal');
-    const modalImages = document.getElementById('modalImages');
-    const modalBody = document.getElementById('modalBody');
+    updateResultsCount(allComplaints.length);
+  } catch (error) {
+    console.error('Error loading complaints:', error);
+    const grid = document.getElementById('complaintsGrid');
+    const loading = document.getElementById('loadingState');
     
-    // Build images section
-    let imagesHTML = '';
-    if (complaint.images && complaint.images.length > 0) {
-        const mainImage = `${API_URL}${complaint.images[0]}`;
-        imagesHTML = `
-            <img src="${mainImage}" alt="${complaint.category}" class="modal-image" id="mainModalImage" onerror="this.src='https://via.placeholder.com/900x400/667eea/ffffff?text=No+Image'">
-        `;
-    } else {
-        imagesHTML = `
-            <img src="https://via.placeholder.com/900x400/667eea/ffffff?text=No+Image" alt="No Image" class="modal-image">
-        `;
-    }
+    if (loading) loading.style.display = 'none';
     
-    modalImages.innerHTML = imagesHTML;
-    
-    // Build body section
-    const statusClass = `status-${complaint.status.toLowerCase().replace(/\s+/g, '-')}`;
-    const date = new Date(complaint.submittedAt).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-    
-    let galleryHTML = '';
-    if (complaint.images && complaint.images.length > 1) {
-        galleryHTML = `
-            <div class="image-gallery">
-                ${complaint.images.map((img, index) => `
-                    <img src="${API_URL}${img}" 
-                         alt="Image ${index + 1}" 
-                         class="gallery-thumb" 
-                         onclick="changeMainImage('${API_URL}${img}')"
-                         onerror="this.src='https://via.placeholder.com/80/667eea/ffffff?text=Error'">
-                `).join('')}
-            </div>
-        `;
-    }
-    
-    modalBody.innerHTML = `
-        <div class="modal-header">
-            <div>
-                <span class="category-badge">${complaint.category}</span>
-                <span class="status-badge ${statusClass}">${complaint.status}</span>
-            </div>
+    if (grid) {
+      grid.style.display = 'block';
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 4rem;">
+          <h3 style="color: #ef4444; margin-bottom: 1rem;">❌ Error Loading</h3>
+          <p style="color: rgba(255,255,255,0.6);">Please check your connection</p>
         </div>
-        
-        <h2 style="color: #333; margin-bottom: 15px;">📍 ${complaint.location}</h2>
-        
-        <div style="color: #666; margin-bottom: 20px;">
-            <p><strong>👤 Reported by:</strong> ${complaint.userName}</p>
-            <p><strong>📅 Date:</strong> ${date}</p>
-            <p><strong>🆔 Complaint ID:</strong> ${complaint._id}</p>
+      `;
+    }
+  }
+}
+
+function displayComplaints(complaints) {
+  const grid = document.getElementById('complaintsGrid');
+  const loading = document.getElementById('loadingState');
+  const noResults = document.getElementById('noResults');
+  
+  if (loading) loading.style.display = 'none';
+  
+  if (complaints.length === 0) {
+    if (grid) grid.style.display = 'none';
+    if (noResults) noResults.style.display = 'block';
+    return;
+  }
+  
+  if (grid) grid.style.display = 'grid';
+  if (noResults) noResults.style.display = 'none';
+  
+  if (grid) {
+    grid.innerHTML = complaints.map((complaint, index) => {
+      const imageUrl = complaint.images && complaint.images[0] 
+        ? `${API_URL}${complaint.images[0]}` 
+        : 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800';
+      
+      const statusClass = `status-${complaint.status.toLowerCase().replace(/\s+/g, '-')}`;
+      const timeAgo = getTimeAgo(new Date(complaint.submittedAt));
+      
+      const categoryIcons = {
+        'drainage': '🚰',
+        'electricity': '⚡',
+        'roads': '🛣️',
+        'sanitation': '🗑️',
+        'water': '💧',
+        'streetlights': '💡'
+      };
+      
+      return `
+        <div class="complaint-card" data-aos="fade-up" data-aos-delay="${index * 50}">
+          <img src="${imageUrl}" class="complaint-image" alt="${complaint.category}">
+          <div class="complaint-content">
+            <div class="complaint-meta">
+              <span class="category-badge">${categoryIcons[complaint.category] || '📋'} ${complaint.category}</span>
+              <span class="status-badge ${statusClass}">${complaint.status}</span>
+            </div>
+            <div class="complaint-location">📍 ${complaint.location}</div>
+            <div class="complaint-description">${complaint.description}</div>
+            <div class="complaint-footer">
+              <span>👤 ${complaint.userName || 'Anonymous'}</span>
+              <span>🕒 ${timeAgo}</span>
+            </div>
+          </div>
         </div>
-        
-        <h3 style="color: #667eea; margin-bottom: 10px;">Description</h3>
-        <p style="color: #333; line-height: 1.8; margin-bottom: 20px;">${complaint.description}</p>
-        
-        ${galleryHTML}
-    `;
+      `;
+    }).join('');
+  }
+}
+
+function getTimeAgo(date) {
+  const seconds = Math.floor((new Date() - date) / 1000);
+  
+  let interval = seconds / 31536000;
+  if (interval > 1) return Math.floor(interval) + " years ago";
+  
+  interval = seconds / 2592000;
+  if (interval > 1) return Math.floor(interval) + " months ago";
+  
+  interval = seconds / 86400;
+  if (interval > 1) return Math.floor(interval) + " days ago";
+  
+  interval = seconds / 3600;
+  if (interval > 1) return Math.floor(interval) + " hours ago";
+  
+  interval = seconds / 60;
+  if (interval > 1) return Math.floor(interval) + " minutes ago";
+  
+  return "Just now";
+}
+
+function updateResultsCount(count) {
+  const resultsCount = document.getElementById('resultsCount');
+  if (resultsCount) {
+    resultsCount.textContent = `${count} Complaint${count !== 1 ? 's' : ''}`;
+  }
+}
+
+function setupFilters() {
+  const searchInput = document.getElementById('searchInput');
+  const categoryFilter = document.getElementById('categoryFilter');
+  const statusFilter = document.getElementById('statusFilter');
+  const locationSearch = document.getElementById('locationSearch');
+  const problemFilter = document.getElementById('problemFilter');
+  
+  if (searchInput) searchInput.addEventListener('input', filterComplaints);
+  if (categoryFilter) categoryFilter.addEventListener('change', filterComplaints);
+  if (statusFilter) statusFilter.addEventListener('change', filterComplaints);
+  if (locationSearch) locationSearch.addEventListener('input', filterComplaints);
+  if (problemFilter) problemFilter.addEventListener('change', filterComplaints);
+}
+
+function filterComplaints() {
+  const search = (document.getElementById('searchInput')?.value || 
+                  document.getElementById('locationSearch')?.value || '').toLowerCase();
+  const category = (document.getElementById('categoryFilter')?.value || 
+                   document.getElementById('problemFilter')?.value || '');
+  const status = document.getElementById('statusFilter')?.value || '';
+  
+  const filtered = allComplaints.filter(complaint => {
+    const matchSearch = complaint.location.toLowerCase().includes(search) || 
+                       complaint.description.toLowerCase().includes(search);
+    const matchCategory = !category || category === 'all' || complaint.category === category;
+    const matchStatus = !status || complaint.status === status;
     
-    modal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
+    return matchSearch && matchCategory && matchStatus;
+  });
+  
+  displayComplaints(filtered);
+  updateResultsCount(filtered.length);
 }
-
-// Close modal
-function closeModal() {
-    const modal = document.getElementById('complaintModal');
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
-}
-
-// Change main image in modal
-function changeMainImage(imageUrl) {
-    const mainImage = document.getElementById('mainModalImage');
-    if (mainImage) {
-        mainImage.src = imageUrl;
-    }
-}
-
-// Close modal when clicking outside
-window.onclick = function(event) {
-    const modal = document.getElementById('complaintModal');
-    if (event.target === modal) {
-        closeModal();
-    }
-}
-
-// Close modal with Escape key
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-        closeModal();
-    }
-});
-
-// Export for debugging
-window.debugComplaints = () => {
-    console.log('All Complaints:', allComplaints);
-    console.log('Filtered Complaints:', filteredComplaints);
-};
