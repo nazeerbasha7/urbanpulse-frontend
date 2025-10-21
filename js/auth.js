@@ -1,3 +1,4 @@
+// Production API URL
 const API_URL = 'https://urbanpulse-backend.onrender.com';
 
 // Toast Notification System (ONLY show when called explicitly)
