@@ -69,6 +69,8 @@ if (registerForm) {
           localStorage.setItem('token', data.token);
           localStorage.setItem('userName', data.userName);
           localStorage.setItem('userId', data.userId);
+          localStorage.setItem('userPhone', userData.phone);
+          localStorage.setItem('userCity', userData.city);
           
           showToast('🎉 Registration successful! Redirecting...', 'success');
           
@@ -124,6 +126,8 @@ if (loginForm) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('userName', data.userName);
         localStorage.setItem('userId', data.userId);
+        localStorage.setItem('userPhone', data.userPhone);
+        localStorage.setItem('userCity', data.userCity);
         
         showToast('🎉 Login successful!', 'success');
         setTimeout(() => {

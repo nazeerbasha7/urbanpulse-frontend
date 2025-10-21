@@ -4,6 +4,7 @@ const API_URL = 'https://urbanpulse-backend.onrender.com';
 const token = localStorage.getItem('token');
 const userId = localStorage.getItem('userId');
 const userName = localStorage.getItem('userName');
+const userPhone = localStorage.getItem('userPhone');
 
 function showToast(message, type = 'success') {
   const container = document.getElementById('toastContainer') || document.body;
@@ -67,10 +68,14 @@ document.getElementById('complaintForm').addEventListener('submit', async (e) =>
   const formData = new FormData(e.target);
   formData.append('userId', userId);
   formData.append('userName', userName);
+  formData.append('userPhone', userPhone);
 
   try {
     const response = await fetch(`${API_URL}/submit-complaint`, {
       method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
       body: formData
     });
 
